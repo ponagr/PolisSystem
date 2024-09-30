@@ -21,6 +21,8 @@ namespace Polisen
     //Presentation Layer. Meny-klass med olika menyer och anrop.
     public static class Menu
     {
+        //Metod som kan användas av alla andra menyer för att minska Redundans.
+        //Används för att kunna göra val i menyn via Piltangenter, Enter och Backspace
         public static int ShowMenu(string[] options)
         {
             int menuChoice = 0;
@@ -35,7 +37,9 @@ namespace Polisen
                 {
                     if (i == menuChoice)
                     {
+                        Console.ForegroundColor = ConsoleColor.DarkCyan;    //För att HighLighta nuvarande menyval med pil och textfärg
                         Console.WriteLine(options[i] + " <--");
+                        Console.ResetColor();
                     }
                     else
                     {
@@ -65,6 +69,7 @@ namespace Polisen
             return -1;
         }
 
+        //Meny-metoder som anropar olika metoder baserat på menyval, anropar först ShowMenu() för själva gränssnittet.
         public static void MainMenu()
         {
             int menuChoice = 0;   
@@ -89,6 +94,7 @@ namespace Polisen
 
         public static void AddMenu()
         {
+            //Skapar instanser av alla klasser för att kunna anropa rätt AddInfo beroende på menyval
             Utryckning utryckning = new Utryckning();
             Personal personal = new Personal();
             Rapport rapport = new Rapport();
@@ -165,25 +171,31 @@ namespace Polisen
 
     }
 
+    
+
+    //Data Access Layer. Lägger till och Hämtar ut data via dessa klasser.
     public class RapportSystem
     {
+        //Statiska listor som är allmänna, inte för specifika objekt.
+        //Håller en samling av flera objekt
         public static List<Utryckning> utryckningsLista = new List<Utryckning>();
         public static List<Personal> personalLista = new List<Personal>();
         public static List<Rapport> rapportLista = new List<Rapport>();
-
-        
+       
     }
 
     public class Utryckning : RapportSystem
     {
         public string brottsTyp;
         public string plats;
-        public string tidpunkt;    
+        public string tidpunkt;   
+
+        //Icke statisk lista som är enskild för varje objekt, innehåller en eller flera poliser från klassen Personal
         public List<Personal> delaktigaPoliser = new List<Personal>();
 
         public void AddInfo()
         {
-            Utryckning utryckning = new Utryckning();
+            Utryckning utryckning = new Utryckning();   //Skapa nytt objekt att lägga till i listan.
             Console.Write($"Fyll i brottstyp: ");
             utryckning.brottsTyp = Console.ReadLine();
             Console.Write($"Fyll i plats: ");
@@ -194,27 +206,27 @@ namespace Polisen
             Console.Write("\nHur många Poliser deltog i utryckningen: ");
             int answer = int.Parse(Console.ReadLine());
             Console.WriteLine("\nVälj polisen/poliserna som deltog: ");
-            for (int i = 0; i < answer; i++)
+            for (int i = 0; i < answer; i++)    //Anropa metoden så många gånger som användaren skriver in, för möjlighet att lägga till flera poliser
             {
-                AddPolice(utryckning);
+                AddPolice(utryckning);  //Skicka med objektet som argument för att lägga till lista i det specifika objektet
             }
             Console.WriteLine("Poliser tillagda i utryckningen:");
-            foreach (var polis in utryckning.delaktigaPoliser)
+            foreach (var polis in utryckning.delaktigaPoliser)  //Kontroll för att se så att poliserna faktiskt har lagts till korrekt i listan
             {
                 Console.WriteLine($"{polis.namn}, {polis.tjänsteNummer}");
             }
             
-            utryckningsLista.Add(utryckning);
+            utryckningsLista.Add(utryckning);   //Lägg till objektet i Statisk Lista
             Console.ReadKey();
         }
 
         public void AddPolice(Utryckning utryckning)
         {
-            PrintPersonal();
+            PrintPersonal();    //Anropa metod för att skriva ut Personal-Listan 
             Console.Write("Skriv in index för polisen du vill lägga till: ");
             int i = int.Parse(Console.ReadLine());
             Console.WriteLine();
-            utryckning.delaktigaPoliser.Add(personalLista[i-1]);
+            utryckning.delaktigaPoliser.Add(personalLista[i-1]);    //Lägg till element på index i, som användaren väljer
             
         }
 
@@ -236,6 +248,7 @@ namespace Polisen
                 Console.WriteLine($"Tidpunkt: {utryckningsLista[i].tidpunkt}");          
                 for (int y = 0; y < utryckningsLista[i].delaktigaPoliser.Count; y++)
                 {
+                    //Skriv ut listan med poliser för nuvarande objekt
                     Console.WriteLine($"Personal: {utryckningsLista[i].delaktigaPoliser[y].namn}, {utryckningsLista[i].delaktigaPoliser[y].tjänsteNummer}");
                 }
                 Console.WriteLine();
